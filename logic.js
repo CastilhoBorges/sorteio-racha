@@ -78,12 +78,29 @@
     return { times: times, proximos: sep.proximos, faltam: sep.faltam };
   }
 
+  function montarTexto(sorteio, rotulo, coletes, notas) {
+    var linhas = ['⚽ *SORTEIO DO RACHA* — ' + rotulo, ''];
+    sorteio.times.forEach(function (time, i) {
+      linhas.push(coletes[i].emoji + ' *TIME ' + coletes[i].nome.toUpperCase() + '*');
+      time.forEach(function (nome) {
+        linhas.push('• ' + nome + (notas ? ' ⭐' + notaDe(notas, nome) : ''));
+      });
+      linhas.push('');
+    });
+    if (sorteio.proximos.length > 0) {
+      linhas.push('⏭️ *PRÓXIMOS*');
+      sorteio.proximos.forEach(function (nome) { linhas.push('• ' + nome); });
+    }
+    return linhas.join('\n').trim();
+  }
+
   var api = {
     limparLinha: limparLinha,
     extrairNomes: extrairNomes,
     embaralhar: embaralhar,
     distribuirAleatorio: distribuirAleatorio,
-    distribuirEquilibrado: distribuirEquilibrado
+    distribuirEquilibrado: distribuirEquilibrado,
+    montarTexto: montarTexto
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

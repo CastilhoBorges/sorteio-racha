@@ -91,3 +91,42 @@ test('distribuirEquilibrado separa próximos na ordem da lista', function () {
   var r = L.distribuirEquilibrado(nomes, {}, 2);
   assert.deepStrictEqual(r.proximos, ['g', 'h']);
 });
+
+var COLETES_FIXTURE = [
+  { nome: 'Vermelho', emoji: '🔴' },
+  { nome: 'Amarelo', emoji: '🟡' },
+  { nome: 'Azul', emoji: '🔵' }
+];
+
+test('montarTexto sem notas reproduz o formato atual', function () {
+  var sorteio = { times: [['João'], ['Pedro'], ['Rafinha']], proximos: ['Careca'] };
+  var esperado = [
+    '⚽ *SORTEIO DO RACHA* — Futsal (3 times de 4)',
+    '',
+    '🔴 *TIME VERMELHO*',
+    '• João',
+    '',
+    '🟡 *TIME AMARELO*',
+    '• Pedro',
+    '',
+    '🔵 *TIME AZUL*',
+    '• Rafinha',
+    '',
+    '⏭️ *PRÓXIMOS*',
+    '• Careca'
+  ].join('\n');
+  assert.strictEqual(
+    L.montarTexto(sorteio, 'Futsal (3 times de 4)', COLETES_FIXTURE, null),
+    esperado
+  );
+});
+
+test('montarTexto com notas põe ⭐ por jogador, próximos sem nota', function () {
+  var sorteio = { times: [['João'], ['Pedro'], ['Rafinha']], proximos: ['Careca'] };
+  var notas = { 'joão': 4, pedro: 5 };
+  var texto = L.montarTexto(sorteio, 'Futsal (3 times de 4)', COLETES_FIXTURE, notas);
+  assert.ok(texto.indexOf('• João ⭐4') !== -1);
+  assert.ok(texto.indexOf('• Pedro ⭐5') !== -1);
+  assert.ok(texto.indexOf('• Rafinha ⭐3') !== -1); // padrão 3
+  assert.ok(texto.indexOf('• Careca ⭐') === -1);   // próximo sem nota
+});
