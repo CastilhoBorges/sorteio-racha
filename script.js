@@ -164,9 +164,7 @@
       var ol = document.createElement('ol');
       time.forEach(function (nome) {
         var li = document.createElement('li');
-        li.textContent = tipoSorteio === 'equilibrado'
-          ? nome + ' ⭐' + L.notaDe(repoNotas.todas(), nome)
-          : nome;
+        li.textContent = nome;
         ol.appendChild(li);
       });
       card.appendChild(label);
@@ -197,8 +195,7 @@
 
   // ---- exportar pro WhatsApp ----
   function textoAtual() {
-    var notas = tipoSorteio === 'equilibrado' ? repoNotas.todas() : null;
-    return L.montarTexto(ultimoSorteio, MODES[mode].rotulo, COLETES, notas);
+    return L.montarTexto(ultimoSorteio, MODES[mode].rotulo, COLETES, null);
   }
 
   $('waBtn').addEventListener('click', function () {
