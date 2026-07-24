@@ -9,6 +9,7 @@ test('limparLinha remove numeração, emoji e sujeira', function () {
   assert.strictEqual(L.limparLinha('  12 -  Zé Pequeno 🔥🔥 '), 'Zé Pequeno');
   assert.strictEqual(L.limparLinha('- - -'), '');
   assert.strictEqual(L.limparLinha(''), '');
+  assert.strictEqual(L.limparLinha('1. O\u{2019}Neill ⚽'), 'O\u{2019}Neill');
 });
 
 test('extrairNomes deduplica e respeita excluídos', function () {

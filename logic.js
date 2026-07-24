@@ -5,9 +5,9 @@
     var s = linha;
     s = s.replace(/^\s*\d+\s*[-–—.):>]*\s*/, '');            // numeração no começo
     s = s.replace(/[\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}]/gu, ''); // bandeiras e tons de pele
-    s = s.replace(/[^\p{L}\s''\-]/gu, ' ');                   // só letras, espaço, hífen, apóstrofo
+    s = s.replace(/[^\p{L}\s'\u{2019}\-]/gu, ' ');                   // só letras, espaço, hífen, apóstrofo
     s = s.replace(/\s+/g, ' ').trim();
-    s = s.replace(/^[-''\s]+|[-''\s]+$/g, '');
+    s = s.replace(/^[-'\u{2019}\s]+|[-'\u{2019}\s]+$/g, '');
     return s;
   }
 
