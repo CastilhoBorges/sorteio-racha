@@ -1,4 +1,5 @@
 (function () {
+  var L = window.RachaLogic;
   var COLETES = [
     { nome: 'Vermelho', cor: '#FF4D3E', emoji: '🔴' },
     { nome: 'Amarelo', cor: '#FFD400', emoji: '🟡' },
@@ -31,29 +32,7 @@
   $('modeSociety').addEventListener('click', function () { setMode('society'); });
 
   // ---- limpeza da lista ----
-  function limparLinha(linha) {
-    var s = linha;
-    s = s.replace(/^\s*\d+\s*[-–—.):>]*\s*/, '');            // numeração no começo
-    s = s.replace(/[\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}]/gu, ''); // bandeiras e tons de pele
-    s = s.replace(/[^\p{L}\s'’\-]/gu, ' ');                   // só letras, espaço, hífen, apóstrofo
-    s = s.replace(/\s+/g, ' ').trim();
-    s = s.replace(/^[-'’\s]+|[-'’\s]+$/g, '');
-    return s;
-  }
-
-  function nomesDetectados() {
-    var vistos = {};
-    var out = [];
-    lista.value.split(/\r?\n/).forEach(function (linha) {
-      var nome = limparLinha(linha);
-      if (!nome) return;
-      var chave = nome.toLowerCase();
-      if (vistos[chave] || excluidos[chave]) return;
-      vistos[chave] = true;
-      out.push(nome);
-    });
-    return out;
-  }
+  function nomesDetectados() { return L.extrairNomes(lista.value, excluidos); }
 
   // ---- render da prévia ----
   function render() {
@@ -99,15 +78,6 @@
   lista.addEventListener('input', function () { excluidos = {}; render(); });
 
   // ---- sorteio ----
-  function embaralhar(arr) {
-    var a = arr.slice();
-    for (var i = a.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var t = a[i]; a[i] = a[j]; a[j] = t;
-    }
-    return a;
-  }
-
   function sortear() {
     var nomes = nomesDetectados();
     var precisa = MODES[mode].porTime * 3;
@@ -115,7 +85,7 @@
     var jogam = nomes.slice(0, Math.min(nomes.length, precisa)); // ordem da lista = prioridade
     var proximos = nomes.slice(precisa);
 
-    var sorteados = embaralhar(jogam);
+    var sorteados = L.embaralhar(jogam);
     var times = [[], [], []];
     sorteados.forEach(function (nome, i) { times[i % 3].push(nome); });
 
