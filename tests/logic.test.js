@@ -26,3 +26,31 @@ test('embaralhar preserva elementos e não muta o original', function () {
   assert.strictEqual(res.length, 5);
   assert.deepStrictEqual(res.slice().sort(), copia.slice().sort());
 });
+
+test('distribuirAleatorio monta 3 times com todo mundo', function () {
+  var nomes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
+  var r = L.distribuirAleatorio(nomes, 4);
+  assert.strictEqual(r.times.length, 3);
+  assert.deepStrictEqual(r.times.map(function (t) { return t.length; }), [4, 4, 4]);
+  assert.deepStrictEqual(r.proximos, []);
+  assert.strictEqual(r.faltam, 0);
+  var todos = r.times[0].concat(r.times[1], r.times[2]).sort();
+  assert.deepStrictEqual(todos, nomes.slice().sort());
+});
+
+test('distribuirAleatorio separa próximos na ordem da lista', function () {
+  var nomes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n'];
+  var r = L.distribuirAleatorio(nomes, 4);
+  assert.deepStrictEqual(r.proximos, ['m', 'n']);
+  assert.strictEqual(r.faltam, 0);
+});
+
+test('distribuirAleatorio com lista incompleta: faltam e diferença máx 1', function () {
+  var nomes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+  var r = L.distribuirAleatorio(nomes, 4);
+  assert.strictEqual(r.faltam, 2);
+  assert.deepStrictEqual(
+    r.times.map(function (t) { return t.length; }).sort(),
+    [3, 3, 4]
+  );
+});

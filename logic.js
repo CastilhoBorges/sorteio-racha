@@ -34,10 +34,28 @@
     return a;
   }
 
+  function separarJogadores(nomes, porTime) {
+    var precisa = porTime * 3;
+    var corte = Math.min(nomes.length, precisa);
+    return {
+      jogam: nomes.slice(0, corte),
+      proximos: nomes.slice(precisa),
+      faltam: Math.max(0, precisa - corte)
+    };
+  }
+
+  function distribuirAleatorio(nomes, porTime) {
+    var sep = separarJogadores(nomes, porTime);
+    var times = [[], [], []];
+    embaralhar(sep.jogam).forEach(function (nome, i) { times[i % 3].push(nome); });
+    return { times: times, proximos: sep.proximos, faltam: sep.faltam };
+  }
+
   var api = {
     limparLinha: limparLinha,
     extrairNomes: extrairNomes,
-    embaralhar: embaralhar
+    embaralhar: embaralhar,
+    distribuirAleatorio: distribuirAleatorio
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
