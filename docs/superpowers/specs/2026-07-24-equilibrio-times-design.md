@@ -49,6 +49,9 @@ troca de etapas, pois nada é recarregado.
 **UI.** Uma linha por jogador: nome à esquerda, cinco botões de estrela à direita,
 com alvo de toque generoso para celular. Tocar na estrela N define nota N.
 Jogador novo começa com 3★; jogador conhecido vem com a nota salva.
+Todos os nomes detectados aparecem para avaliação, na ordem da lista — inclusive
+quem ficará de "próximo" (a nota fica salva para os rachas seguintes); esses
+recebem o mesmo tratamento visual esmaecido dos chips além do corte.
 
 **Persistência.** `localStorage` na chave `sorteioracha:notas`, guardando um objeto
 `{ "nome normalizado": 1..5 }`. A normalização é a mesma já usada para deduplicar
@@ -83,6 +86,9 @@ Propriedades:
   nos cards de colete quanto no texto do WhatsApp/copiar ("• João ⭐4").
 - No sorteio aleatório, resultado e texto exportado ficam exatamente como hoje,
   sem estrelas.
+- **"Sortear de novo"** repete o mesmo tipo de sorteio que gerou o resultado
+  atual: equilibrado repete equilibrado (com novo desempate aleatório),
+  aleatório repete aleatório.
 - Sem linha extra de "times equilibrados": as estrelas já comunicam isso.
 
 ## Casos-limite
