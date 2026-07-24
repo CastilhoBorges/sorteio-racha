@@ -100,7 +100,38 @@
 
   // ---- etapa 2: avaliação ----
   function renderAvaliacao() {
-    // as linhas de estrelas entram na próxima tarefa
+    var nomes = nomesDetectados();
+    var precisa = MODES[mode].porTime * 3;
+    avaliacao.innerHTML = '';
+    nomes.forEach(function (nome, idx) {
+      var row = document.createElement('div');
+      row.className = 'aval-row' + (idx >= precisa ? ' aval-proximo' : '');
+      var nomeEl = document.createElement('span');
+      nomeEl.className = 'aval-nome';
+      nomeEl.textContent = nome;
+      var stars = document.createElement('div');
+      stars.className = 'estrelas';
+      stars.setAttribute('aria-label', 'Nota de ' + nome);
+      var atual = repoNotas.obter(nome) || 3;
+      for (var n = 1; n <= 5; n++) {
+        (function (n) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'estrela' + (n <= atual ? ' cheia' : '');
+          b.textContent = n <= atual ? '★' : '☆';
+          b.setAttribute('aria-label', nome + ': ' + n + ' de 5');
+          b.setAttribute('aria-pressed', String(n === atual));
+          b.addEventListener('click', function () {
+            repoNotas.definir(nome, n);
+            renderAvaliacao();
+          });
+          stars.appendChild(b);
+        })(n);
+      }
+      row.appendChild(nomeEl);
+      row.appendChild(stars);
+      avaliacao.appendChild(row);
+    });
   }
   $('voltar2Btn').addEventListener('click', function () { irParaEtapa(1); });
   $('sortEqBtn').addEventListener('click', function () { sortear('equilibrado'); });

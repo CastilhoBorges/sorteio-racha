@@ -160,3 +160,18 @@ textarea::placeholder { color: rgba(242, 245, 239, 0.32); }
   font-family: inherit; font-size: 14px; text-decoration: underline; padding: 6px;
 }
 .btn-link:hover { color: var(--ink); }
+
+/* etapa 2 — linhas de avaliação */
+#avaliacao { margin-bottom: 6px; }
+.aval-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 6px 0; border-bottom: 1px solid var(--line);
+}
+.aval-proximo { opacity: 0.55; }
+.aval-nome { font-weight: 500; font-size: 15px; }
+.estrelas { display: flex; }
+.estrela {
+  background: none; border: none; cursor: pointer;
+  font-size: 24px; line-height: 1; padding: 6px 3px; color: var(--ink-dim);
+}
+.estrela.cheia { color: var(--amarelo); }
