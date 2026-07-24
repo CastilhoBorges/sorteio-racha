@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorteio do Racha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="court" aria-hidden="true">
+  <svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMin slice">
+    <circle cx="500" cy="120" r="150" fill="none" stroke="rgba(242,245,239,0.06)" stroke-width="2"/>
+    <line x1="0" y1="120" x2="1000" y2="120" stroke="rgba(242,245,239,0.06)" stroke-width="2"/>
+    <circle cx="500" cy="120" r="5" fill="rgba(242,245,239,0.06)"/>
+  </svg>
+</div>
+
+<div class="wrap">
+  <header>
+    <h1>Sorteio do Racha</h1>
+  </header>
+
+  <section class="mode" role="group" aria-label="Modalidade">
+    <button type="button" id="modeSociety" aria-pressed="false">
+      <span class="m-name">Society</span>
+      <span class="m-desc">3 times de 6 &middot; 18 em campo</span>
+    </button>
+    <button type="button" id="modeFutsal" aria-pressed="false">
+      <span class="m-name">Futsal</span>
+      <span class="m-desc">3 times de 4 &middot; 12 na quadra</span>
+    </button>
+  </section>
+
+  <section class="field">
+    <label for="lista">Cole a lista do grupo
+      <span class="hint">&mdash; pode vir com números, emoji, traço, o que for. Eu limpo.</span>
+    </label>
+    <textarea id="lista" placeholder="1. João ⚽&#10;2. Pedro 🔥&#10;3 - Rafinha ✅&#10;4) Careca 😂&#10;..."></textarea>
+    <div class="parsed">
+      <div class="counter" id="counter">Nenhum nome detectado ainda.</div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <button class="cta" id="sortBtn" disabled>Sortear times</button>
+  </section>
+
+  <section id="results" hidden>
+    <p class="r-note" id="rNote" hidden></p>
+    <div class="teams" id="teams"></div>
+    <div class="bench" id="bench" hidden>
+      <h3>Próximos (na ordem da lista)</h3>
+      <p id="benchNames"></p>
+    </div>
+    <div class="actions">
+      <button id="waBtn" type="button">Enviar no WhatsApp</button>
+      <button id="copyBtn" type="button">Copiar texto</button>
+      <button id="againBtn" type="button">Sortear de novo</button>
+    </div>
+  </section>
+</div>
+
+<div id="toast" role="status">Copiado!</div>
+
+<script src="script.js"></script>
+</body>
+</html>
