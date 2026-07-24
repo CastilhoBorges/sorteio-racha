@@ -130,3 +130,50 @@ test('montarTexto com notas põe ⭐ por jogador, próximos sem nota', function 
   assert.ok(texto.indexOf('• Rafinha ⭐3') !== -1); // padrão 3
   assert.ok(texto.indexOf('• Careca ⭐') === -1);   // próximo sem nota
 });
+
+function storageFake(valorInicial) {
+  var dados = {};
+  if (valorInicial !== undefined) dados[L.CHAVE_NOTAS] = valorInicial;
+  return {
+    getItem: function (k) { return k in dados ? dados[k] : null; },
+    setItem: function (k, v) { dados[k] = String(v); },
+    _dados: dados
+  };
+}
+
+test('repositório lê notas salvas e normaliza o nome', function () {
+  var st = storageFake(JSON.stringify({ 'joão': 5, pedro: 2 }));
+  var repo = L.criarRepositorioNotas(st);
+  assert.strictEqual(repo.obter('João'), 5);
+  assert.strictEqual(repo.obter('PEDRO'), 2);
+  assert.strictEqual(repo.obter('Rafinha'), null);
+});
+
+test('definir salva no storage na hora', function () {
+  var st = storageFake();
+  var repo = L.criarRepositorioNotas(st);
+  repo.definir('Careca', 4);
+  assert.strictEqual(JSON.parse(st._dados[L.CHAVE_NOTAS]).careca, 4);
+  assert.strictEqual(repo.obter('careca'), 4);
+});
+
+test('storage nulo funciona só em memória', function () {
+  var repo = L.criarRepositorioNotas(null);
+  repo.definir('João', 2);
+  assert.strictEqual(repo.obter('joão'), 2);
+});
+
+test('JSON corrompido ou valores inválidos não quebram', function () {
+  var repo = L.criarRepositorioNotas(storageFake('{{{'));
+  assert.strictEqual(repo.obter('João'), null);
+  var repo2 = L.criarRepositorioNotas(storageFake(JSON.stringify({ 'joão': 9 })));
+  assert.strictEqual(repo2.obter('João'), null);
+});
+
+test('todas devolve cópia, no formato de distribuirEquilibrado', function () {
+  var repo = L.criarRepositorioNotas(storageFake(JSON.stringify({ 'joão': 4 })));
+  var copia = repo.todas();
+  assert.deepStrictEqual(copia, { 'joão': 4 });
+  copia['joão'] = 1;
+  assert.strictEqual(repo.obter('João'), 4);
+});

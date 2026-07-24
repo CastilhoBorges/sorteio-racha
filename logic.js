@@ -94,13 +94,45 @@
     return linhas.join('\n').trim();
   }
 
+  var CHAVE_NOTAS = 'sorteioracha:notas';
+
+  function criarRepositorioNotas(storage) {
+    var notas = {};
+    if (storage) {
+      try { notas = JSON.parse(storage.getItem(CHAVE_NOTAS)) || {}; }
+      catch (e) { notas = {}; }
+      if (typeof notas !== 'object' || Array.isArray(notas) || notas === null) notas = {};
+    }
+    function salvar() {
+      if (!storage) return;
+      try { storage.setItem(CHAVE_NOTAS, JSON.stringify(notas)); } catch (e) {}
+    }
+    return {
+      obter: function (nome) {
+        var n = notas[nome.toLowerCase()];
+        return (n >= 1 && n <= 5) ? n : null;
+      },
+      definir: function (nome, nota) {
+        notas[nome.toLowerCase()] = nota;
+        salvar();
+      },
+      todas: function () {
+        var copia = {};
+        Object.keys(notas).forEach(function (k) { copia[k] = notas[k]; });
+        return copia;
+      }
+    };
+  }
+
   var api = {
     limparLinha: limparLinha,
     extrairNomes: extrairNomes,
     embaralhar: embaralhar,
     distribuirAleatorio: distribuirAleatorio,
     distribuirEquilibrado: distribuirEquilibrado,
-    montarTexto: montarTexto
+    montarTexto: montarTexto,
+    criarRepositorioNotas: criarRepositorioNotas,
+    CHAVE_NOTAS: CHAVE_NOTAS
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
