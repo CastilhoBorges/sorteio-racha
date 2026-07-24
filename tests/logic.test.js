@@ -177,3 +177,14 @@ test('todas devolve cópia, no formato de distribuirEquilibrado', function () {
   copia['joão'] = 1;
   assert.strictEqual(repo.obter('João'), 4);
 });
+
+test('storage que lança exceção não quebra', function () {
+  var storageQuebrado = {
+    getItem: function () { throw new Error('falhou'); },
+    setItem: function () { throw new Error('falhou'); }
+  };
+  var repo = L.criarRepositorioNotas(storageQuebrado);
+  assert.strictEqual(repo.obter('João'), null);
+  repo.definir('João', 4);
+  assert.strictEqual(repo.obter('João'), 4);
+});
