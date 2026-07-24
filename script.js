@@ -1,5 +1,6 @@
 (function () {
   var L = window.RachaLogic;
+
   var COLETES = [
     { nome: 'Vermelho', cor: '#FF4D3E', emoji: '🔴' },
     { nome: 'Amarelo', cor: '#FFD400', emoji: '🟡' },
@@ -10,13 +11,18 @@
 
   var mode = 'futsal';
   var excluidos = {};        // nomes removidos manualmente (clique no ×)
-  var ultimoSorteio = null;  // { times: [[..],[..],[..]], proximos: [..] }
+  var ultimoSorteio = null;  // { times, proximos, faltam }
+  var tipoSorteio = null;    // 'equilibrado' | 'aleatorio'
 
   var $ = function (id) { return document.getElementById(id); };
   var lista = $('lista'), chips = $('chips'), counter = $('counter'),
-      sortBtn = $('sortBtn'), results = $('results'), teamsEl = $('teams'),
+      continuarBtn = $('continuarBtn'), teamsEl = $('teams'),
       bench = $('bench'), benchNames = $('benchNames'), rNote = $('rNote'),
-      toast = $('toast');
+      avaliacao = $('avaliacao'), toast = $('toast');
+
+  var repoNotas = L.criarRepositorioNotas((function () {
+    try { return window.localStorage; } catch (e) { return null; }
+  })());
 
   // sugere a modalidade pelo dia da semana (sex–dom = society)
   var dia = new Date().getDay();
@@ -31,10 +37,20 @@
   $('modeFutsal').addEventListener('click', function () { setMode('futsal'); });
   $('modeSociety').addEventListener('click', function () { setMode('society'); });
 
-  // ---- limpeza da lista ----
   function nomesDetectados() { return L.extrairNomes(lista.value, excluidos); }
 
-  // ---- render da prévia ----
+  // ---- wizard ----
+  function irParaEtapa(n) {
+    $('etapa1').hidden = n !== 1;
+    $('etapa2').hidden = n !== 2;
+    $('etapa3').hidden = n !== 3;
+    [1, 2, 3].forEach(function (i) {
+      $('passo' + i).classList.toggle('ativo', i === n);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ---- render da prévia (etapa 1) ----
   function render() {
     var nomes = nomesDetectados();
     var precisa = MODES[mode].porTime * 3;
@@ -73,24 +89,33 @@
         ' primeiros da lista entram no sorteio, ' + (nomes.length - precisa) + ' ficam de próximo.';
     }
 
-    sortBtn.disabled = nomes.length < 3;
+    continuarBtn.disabled = nomes.length < 3;
   }
   lista.addEventListener('input', function () { excluidos = {}; render(); });
 
+  continuarBtn.addEventListener('click', function () {
+    renderAvaliacao();
+    irParaEtapa(2);
+  });
+
+  // ---- etapa 2: avaliação ----
+  function renderAvaliacao() {
+    // as linhas de estrelas entram na próxima tarefa
+  }
+  $('voltar2Btn').addEventListener('click', function () { irParaEtapa(1); });
+  $('sortEqBtn').addEventListener('click', function () { sortear('equilibrado'); });
+  $('skipBtn').addEventListener('click', function () { sortear('aleatorio'); });
+
   // ---- sorteio ----
-  function sortear() {
+  function sortear(tipo) {
+    tipoSorteio = tipo;
     var nomes = nomesDetectados();
-    var precisa = MODES[mode].porTime * 3;
-
-    var jogam = nomes.slice(0, Math.min(nomes.length, precisa)); // ordem da lista = prioridade
-    var proximos = nomes.slice(precisa);
-
-    var sorteados = L.embaralhar(jogam);
-    var times = [[], [], []];
-    sorteados.forEach(function (nome, i) { times[i % 3].push(nome); });
-
-    ultimoSorteio = { times: times, proximos: proximos, faltam: Math.max(0, precisa - jogam.length) };
+    var porTime = MODES[mode].porTime;
+    ultimoSorteio = tipo === 'equilibrado'
+      ? L.distribuirEquilibrado(nomes, repoNotas.todas(), porTime)
+      : L.distribuirAleatorio(nomes, porTime);
     mostrarResultado();
+    irParaEtapa(3);
   }
 
   function mostrarResultado() {
@@ -130,38 +155,26 @@
     } else {
       bench.hidden = true;
     }
-
-    results.hidden = false;
-    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  sortBtn.addEventListener('click', sortear);
-  $('againBtn').addEventListener('click', sortear);
+  $('againBtn').addEventListener('click', function () { sortear(tipoSorteio); });
+  $('voltar3Btn').addEventListener('click', function () {
+    irParaEtapa(tipoSorteio === 'aleatorio' ? 1 : 2);
+  });
 
   // ---- exportar pro WhatsApp ----
-  function montarTexto() {
-    var s = ultimoSorteio;
-    var linhas = ['⚽ *SORTEIO DO RACHA* — ' + MODES[mode].rotulo, ''];
-    s.times.forEach(function (time, i) {
-      linhas.push(COLETES[i].emoji + ' *TIME ' + COLETES[i].nome.toUpperCase() + '*');
-      time.forEach(function (nome) { linhas.push('• ' + nome); });
-      linhas.push('');
-    });
-    if (s.proximos.length > 0) {
-      linhas.push('⏭️ *PRÓXIMOS*');
-      s.proximos.forEach(function (nome) { linhas.push('• ' + nome); });
-    }
-    return linhas.join('\n').trim();
+  function textoAtual() {
+    return L.montarTexto(ultimoSorteio, MODES[mode].rotulo, COLETES, null);
   }
 
   $('waBtn').addEventListener('click', function () {
     if (!ultimoSorteio) return;
-    window.open('https://wa.me/?text=' + encodeURIComponent(montarTexto()), '_blank');
+    window.open('https://wa.me/?text=' + encodeURIComponent(textoAtual()), '_blank');
   });
 
   $('copyBtn').addEventListener('click', function () {
     if (!ultimoSorteio) return;
-    var texto = montarTexto();
+    var texto = textoAtual();
 
     function ok() {
       toast.classList.add('show');
@@ -182,4 +195,5 @@
   });
 
   setMode(mode);
+  irParaEtapa(1);
 })();

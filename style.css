@@ -93,7 +93,6 @@ textarea::placeholder { color: rgba(242, 245, 239, 0.32); }
 .cta:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* resultado */
-#results { margin-top: 34px; }
 .r-note { font-size: 14px; color: var(--amarelo); margin-bottom: 14px; }
 .teams { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 @media (max-width: 680px) { .teams { grid-template-columns: 1fr; } }
@@ -141,3 +140,23 @@ textarea::placeholder { color: rgba(242, 245, 239, 0.32); }
   transition: opacity .2s, transform .2s;
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* wizard */
+.passos {
+  display: flex; justify-content: center; gap: 16px; margin-top: 12px;
+  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-dim);
+}
+.passo.ativo { color: var(--amarelo); font-weight: 700; }
+
+.etapa-titulo {
+  font-family: 'Anton', 'Arial Narrow', Impact, sans-serif; font-weight: 400;
+  font-size: 24px; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px;
+}
+.etapa-sub { font-size: 13px; color: var(--ink-dim); margin-bottom: 14px; }
+
+.nav-sec { display: flex; justify-content: center; gap: 22px; margin-top: 14px; }
+.btn-link {
+  background: none; border: none; color: var(--ink-dim); cursor: pointer;
+  font-family: inherit; font-size: 14px; text-decoration: underline; padding: 6px;
+}
+.btn-link:hover { color: var(--ink); }

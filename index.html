@@ -21,32 +21,50 @@
 <div class="wrap">
   <header>
     <h1>Sorteio do Racha</h1>
+    <nav class="passos" aria-label="Etapas">
+      <span class="passo ativo" id="passo1">1 Lista</span>
+      <span class="passo" id="passo2">2 Times</span>
+      <span class="passo" id="passo3">3 Resultado</span>
+    </nav>
   </header>
 
-  <section class="mode" role="group" aria-label="Modalidade">
-    <button type="button" id="modeSociety" aria-pressed="false">
-      <span class="m-name">Society</span>
-      <span class="m-desc">3 times de 6 &middot; 18 em campo</span>
-    </button>
-    <button type="button" id="modeFutsal" aria-pressed="false">
-      <span class="m-name">Futsal</span>
-      <span class="m-desc">3 times de 4 &middot; 12 na quadra</span>
-    </button>
-  </section>
-
-  <section class="field">
-    <label for="lista">Cole a lista do grupo
-      <span class="hint">&mdash; pode vir com números, emoji, traço, o que for. Eu limpo.</span>
-    </label>
-    <textarea id="lista" placeholder="1. João ⚽&#10;2. Pedro 🔥&#10;3 - Rafinha ✅&#10;4) Careca 😂&#10;..."></textarea>
-    <div class="parsed">
-      <div class="counter" id="counter">Nenhum nome detectado ainda.</div>
-      <div class="chips" id="chips"></div>
+  <section class="etapa" id="etapa1">
+    <div class="mode" role="group" aria-label="Modalidade">
+      <button type="button" id="modeSociety" aria-pressed="false">
+        <span class="m-name">Society</span>
+        <span class="m-desc">3 times de 6 &middot; 18 em campo</span>
+      </button>
+      <button type="button" id="modeFutsal" aria-pressed="false">
+        <span class="m-name">Futsal</span>
+        <span class="m-desc">3 times de 4 &middot; 12 na quadra</span>
+      </button>
     </div>
-    <button class="cta" id="sortBtn" disabled>Sortear times</button>
+
+    <div class="field">
+      <label for="lista">Cole a lista do grupo
+        <span class="hint">&mdash; pode vir com números, emoji, traço, o que for. Eu limpo.</span>
+      </label>
+      <textarea id="lista" placeholder="1. João ⚽&#10;2. Pedro 🔥&#10;3 - Rafinha ✅&#10;4) Careca 😂&#10;..."></textarea>
+      <div class="parsed">
+        <div class="counter" id="counter">Nenhum nome detectado ainda.</div>
+        <div class="chips" id="chips"></div>
+      </div>
+      <button class="cta" id="continuarBtn" disabled>Continuar</button>
+    </div>
   </section>
 
-  <section id="results" hidden>
+  <section class="etapa" id="etapa2" hidden>
+    <h2 class="etapa-titulo">Avalie os jogadores</h2>
+    <p class="etapa-sub">Só você vê essas notas. Elas ficam salvas neste navegador pro próximo racha.</p>
+    <div id="avaliacao"></div>
+    <button class="cta" id="sortEqBtn">Sortear equilibrado</button>
+    <div class="nav-sec">
+      <button class="btn-link" id="skipBtn" type="button">Pular e sortear aleatório</button>
+      <button class="btn-link" id="voltar2Btn" type="button">Voltar</button>
+    </div>
+  </section>
+
+  <section class="etapa" id="etapa3" hidden>
     <p class="r-note" id="rNote" hidden></p>
     <div class="teams" id="teams"></div>
     <div class="bench" id="bench" hidden>
@@ -57,6 +75,9 @@
       <button id="waBtn" type="button">Enviar no WhatsApp</button>
       <button id="copyBtn" type="button">Copiar texto</button>
       <button id="againBtn" type="button">Sortear de novo</button>
+    </div>
+    <div class="nav-sec">
+      <button class="btn-link" id="voltar3Btn" type="button">Voltar</button>
     </div>
   </section>
 </div>
