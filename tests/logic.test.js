@@ -54,3 +54,40 @@ test('distribuirAleatorio com lista incompleta: faltam e diferença máx 1', fun
     [3, 3, 4]
   );
 });
+
+test('distribuirEquilibrado iguala as somas de estrelas', function () {
+  var nomes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'];
+  var notas = { a: 5, b: 5, c: 5, d: 4, e: 4, f: 4, g: 2, h: 2, i: 2, j: 1, k: 1, l: 1 };
+  var r = L.distribuirEquilibrado(nomes, notas, 4);
+  var somas = r.times.map(function (t) {
+    return t.reduce(function (s, n) { return s + notas[n]; }, 0);
+  });
+  assert.deepStrictEqual(somas, [12, 12, 12]);
+  assert.deepStrictEqual(r.times.map(function (t) { return t.length; }), [4, 4, 4]);
+  var todos = r.times[0].concat(r.times[1], r.times[2]).sort();
+  assert.deepStrictEqual(todos, nomes.slice().sort());
+});
+
+test('distribuirEquilibrado usa nota padrão 3 pra desconhecidos', function () {
+  var nomes = ['a', 'b', 'c', 'd', 'e', 'f'];
+  var r = L.distribuirEquilibrado(nomes, {}, 2);
+  assert.deepStrictEqual(r.times.map(function (t) { return t.length; }), [2, 2, 2]);
+  var todos = r.times[0].concat(r.times[1], r.times[2]).sort();
+  assert.deepStrictEqual(todos, nomes.slice().sort());
+});
+
+test('distribuirEquilibrado com lista incompleta: diferença máx 1 e faltam', function () {
+  var nomes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+  var r = L.distribuirEquilibrado(nomes, { a: 5, b: 1 }, 4);
+  assert.strictEqual(r.faltam, 2);
+  assert.deepStrictEqual(
+    r.times.map(function (t) { return t.length; }).sort(),
+    [3, 3, 4]
+  );
+});
+
+test('distribuirEquilibrado separa próximos na ordem da lista', function () {
+  var nomes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  var r = L.distribuirEquilibrado(nomes, {}, 2);
+  assert.deepStrictEqual(r.proximos, ['g', 'h']);
+});

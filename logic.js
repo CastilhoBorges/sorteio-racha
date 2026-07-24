@@ -51,11 +51,39 @@
     return { times: times, proximos: sep.proximos, faltam: sep.faltam };
   }
 
+  function notaDe(notas, nome) {
+    var n = notas ? notas[nome.toLowerCase()] : null;
+    return (n >= 1 && n <= 5) ? n : 3;
+  }
+
+  function distribuirEquilibrado(nomes, notas, porTime) {
+    var sep = separarJogadores(nomes, porTime);
+    // agrupa por nota e embaralha os empatados: o sorteio continua sendo sorteio
+    var grupos = {};
+    sep.jogam.forEach(function (nome) {
+      var n = notaDe(notas, nome);
+      (grupos[n] = grupos[n] || []).push(nome);
+    });
+    var ordenados = [];
+    [5, 4, 3, 2, 1].forEach(function (n) {
+      if (grupos[n]) ordenados = ordenados.concat(embaralhar(grupos[n]));
+    });
+    // serpentina: rodada par distribui 1,2,3 — rodada ímpar 3,2,1
+    var times = [[], [], []];
+    ordenados.forEach(function (nome, i) {
+      var rodada = Math.floor(i / 3);
+      var pos = i % 3;
+      times[rodada % 2 === 0 ? pos : 2 - pos].push(nome);
+    });
+    return { times: times, proximos: sep.proximos, faltam: sep.faltam };
+  }
+
   var api = {
     limparLinha: limparLinha,
     extrairNomes: extrairNomes,
     embaralhar: embaralhar,
-    distribuirAleatorio: distribuirAleatorio
+    distribuirAleatorio: distribuirAleatorio,
+    distribuirEquilibrado: distribuirEquilibrado
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
