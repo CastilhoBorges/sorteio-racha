@@ -112,7 +112,7 @@
       var stars = document.createElement('div');
       stars.className = 'estrelas';
       stars.setAttribute('aria-label', 'Nota de ' + nome);
-      var atual = repoNotas.obter(nome) || 3;
+      var atual = L.notaDe(repoNotas.todas(), nome);
       for (var n = 1; n <= 5; n++) {
         (function (n) {
           var b = document.createElement('button');
@@ -165,7 +165,7 @@
       time.forEach(function (nome) {
         var li = document.createElement('li');
         li.textContent = tipoSorteio === 'equilibrado'
-          ? nome + ' ⭐' + (repoNotas.obter(nome) || 3)
+          ? nome + ' ⭐' + L.notaDe(repoNotas.todas(), nome)
           : nome;
         ol.appendChild(li);
       });

@@ -7,7 +7,7 @@
     s = s.replace(/[\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}]/gu, ''); // bandeiras e tons de pele
     s = s.replace(/[^\p{L}\s'\u{2019}\-]/gu, ' ');                   // só letras, espaço, hífen, apóstrofo
     s = s.replace(/\s+/g, ' ').trim();
-    s = s.replace(/^[-'\u{2019}\s]+|[-'\u{2019}\s]+$/g, '');
+    s = s.replace(/^[-'’\s]+|[-'’\s]+$/g, '');
     return s;
   }
 
@@ -53,7 +53,7 @@
 
   function notaDe(notas, nome) {
     var n = notas ? notas[nome.toLowerCase()] : null;
-    return (n >= 1 && n <= 5) ? n : 3;
+    return (n === 1 || n === 2 || n === 3 || n === 4 || n === 5) ? n : 3;
   }
 
   function distribuirEquilibrado(nomes, notas, porTime) {
@@ -110,7 +110,7 @@
     return {
       obter: function (nome) {
         var n = notas[nome.toLowerCase()];
-        return (n >= 1 && n <= 5) ? n : null;
+        return (n === 1 || n === 2 || n === 3 || n === 4 || n === 5) ? n : null;
       },
       definir: function (nome, nota) {
         notas[nome.toLowerCase()] = nota;
@@ -130,6 +130,7 @@
     embaralhar: embaralhar,
     distribuirAleatorio: distribuirAleatorio,
     distribuirEquilibrado: distribuirEquilibrado,
+    notaDe: notaDe,
     montarTexto: montarTexto,
     criarRepositorioNotas: criarRepositorioNotas,
     CHAVE_NOTAS: CHAVE_NOTAS

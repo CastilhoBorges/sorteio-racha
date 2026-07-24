@@ -1,3 +1,4 @@
+// rode com: node --test  (rodar com "node --test tests/" falha nesta versão do Node)
 var test = require('node:test');
 var assert = require('node:assert');
 var L = require('../logic.js');
@@ -10,6 +11,17 @@ test('limparLinha remove numeração, emoji e sujeira', function () {
   assert.strictEqual(L.limparLinha('- - -'), '');
   assert.strictEqual(L.limparLinha(''), '');
   assert.strictEqual(L.limparLinha('1. O\u{2019}Neill ⚽'), 'O\u{2019}Neill');
+});
+
+test('limparLinha não corrompe nomes terminados/começados em letras do escape \\u2019 (regressão)', function () {
+  // regressão: uma versão anterior da regex de trim usava /\u{2019}/ sem a flag "u",
+  // o que degradava para o escape de identidade "u" seguido de "2019" literais,
+  // apagando a letra "u" (e dígitos/chaves) do início/fim dos nomes.
+  assert.strictEqual(L.limparLinha('11. Edu'), 'Edu');
+  assert.strictEqual(L.limparLinha('Cacau'), 'Cacau');
+  assert.strictEqual(L.limparLinha('3. Du'), 'Du');
+  // apóstrofo curvo líder/final deve ser removido (ao contrário do interno, em "O’Neill")
+  assert.strictEqual(L.limparLinha('\u{2019}Ana\u{2019}'), 'Ana');
 });
 
 test('extrairNomes deduplica e respeita excluídos', function () {
@@ -92,6 +104,20 @@ test('distribuirEquilibrado separa próximos na ordem da lista', function () {
   assert.deepStrictEqual(r.proximos, ['g', 'h']);
 });
 
+test('distribuirEquilibrado sorteia de novo produz arranjos diferentes (embaralha empatados)', function () {
+  // todo mundo empatado na mesma nota: com 3+ jogadores no mesmo grupo, o embaralhamento
+  // dentro do empate deve gerar arranjos de times diferentes em execuções repetidas.
+  var nomes = ['a', 'b', 'c'];
+  var notas = { a: 3, b: 3, c: 3 };
+  var arranjos = {};
+  for (var i = 0; i < 50; i++) {
+    var r = L.distribuirEquilibrado(nomes, notas, 1);
+    arranjos[JSON.stringify(r.times)] = true;
+  }
+  assert.ok(Object.keys(arranjos).length > 1,
+    'esperava mais de 1 arranjo distinto em 50 sorteios, obteve ' + Object.keys(arranjos).length);
+});
+
 var COLETES_FIXTURE = [
   { nome: 'Vermelho', emoji: '🔴' },
   { nome: 'Amarelo', emoji: '🟡' },
@@ -168,6 +194,22 @@ test('JSON corrompido ou valores inválidos não quebram', function () {
   assert.strictEqual(repo.obter('João'), null);
   var repo2 = L.criarRepositorioNotas(storageFake(JSON.stringify({ 'joão': 9 })));
   assert.strictEqual(repo2.obter('João'), null);
+});
+
+test('nota não inteira ou truthy não vira jogador fantasma (regressão): obter/notaDe degradam ao padrão', function () {
+  // regressão: notaDe e repo.obter só checavam n >= 1 && n <= 5, sem exigir inteiro.
+  // um valor corrompido tipo 4.5 ou true caía num grupo (grupos[4.5]/grupos[true]) que o
+  // laço [5,4,3,2,1] nunca lê, apagando o jogador de todos os times e de "próximos".
+  var repo = L.criarRepositorioNotas(storageFake(JSON.stringify({ 'joão': 4.5, maria: true })));
+  assert.strictEqual(repo.obter('joão'), null);
+  assert.strictEqual(repo.obter('maria'), null);
+  assert.strictEqual(L.notaDe({ joão: 4.5 }, 'joão'), 3);
+  assert.strictEqual(L.notaDe({ maria: true }, 'maria'), 3);
+
+  var nomes = ['joão', 'a', 'b'];
+  var r = L.distribuirEquilibrado(nomes, { joão: 4.5 }, 1);
+  var todos = r.times[0].concat(r.times[1], r.times[2], r.proximos).sort();
+  assert.deepStrictEqual(todos, nomes.slice().sort());
 });
 
 test('todas devolve cópia, no formato de distribuirEquilibrado', function () {
