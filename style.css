@@ -34,23 +34,52 @@ h1 {
   letter-spacing: 0.02em; text-transform: uppercase; line-height: 1;
 }
 
-/* modalidade */
-.mode { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
-.mode button {
+/* configuração do racha */
+.config { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.stepper, .coletes-cfg {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-  color: var(--ink-dim); padding: 14px 10px; cursor: pointer; font-family: inherit;
-  text-align: center; transition: border-color .15s, color .15s;
+  padding: 10px 12px; text-align: center;
 }
-.mode button .m-name {
+.stepper { flex: 1 1 130px; }
+.coletes-cfg { flex: 2 1 220px; }
+.s-label {
+  display: block; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-dim); margin-bottom: 8px;
+}
+.s-controls { display: flex; align-items: center; justify-content: center; gap: 4px; }
+.s-controls button {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: none; border: 1px solid var(--line); color: var(--ink);
+  font-size: 20px; line-height: 1; cursor: pointer;
+}
+.s-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
+.s-controls output {
   font-family: 'Anton', 'Arial Narrow', Impact, sans-serif;
-  font-size: 20px; letter-spacing: 0.04em; text-transform: uppercase; display: block;
+  font-size: 26px; min-width: 44px; color: var(--ink);
 }
-.mode button .m-desc { font-size: 12px; margin-top: 3px; display: block; }
-.mode button[aria-pressed="true"] {
-  border-color: var(--ink); color: var(--ink);
-  background: rgba(242, 245, 239, 0.09);
+.coletes-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+.colete-dot {
+  width: 38px; height: 38px; border-radius: 50%; border: 2px solid transparent;
+  color: var(--ink-on-colete); font-family: inherit; font-weight: 700; font-size: 14px;
+  cursor: pointer;
 }
-.mode button:focus-visible, button:focus-visible, textarea:focus-visible {
+.colete-dot.escuro { color: var(--ink); }
+.colete-dot.aberto { border-color: var(--ink); box-shadow: 0 0 0 2px rgba(242, 245, 239, 0.35); }
+.paleta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 10px 12px; margin-bottom: 14px;
+}
+.paleta[hidden] { display: none; }
+.paleta-titulo { font-size: 13px; color: var(--ink-dim); margin-right: 4px; }
+.paleta-dot {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.25); cursor: pointer;
+}
+.paleta-dot:disabled { opacity: 0.25; cursor: not-allowed; }
+.paleta-dot.atual { box-shadow: 0 0 0 2px var(--ink); }
+
+button:focus-visible, textarea:focus-visible {
   outline: 2px solid var(--amarelo); outline-offset: 2px;
 }
 
@@ -94,8 +123,7 @@ textarea::placeholder { color: rgba(242, 245, 239, 0.32); }
 
 /* resultado */
 .r-note { font-size: 14px; color: var(--amarelo); margin-bottom: 14px; }
-.teams { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-@media (max-width: 680px) { .teams { grid-template-columns: 1fr; } }
+.teams { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
 
 .colete {
   border-radius: var(--radius); padding: 16px 16px 18px; color: var(--ink-on-colete);
@@ -104,8 +132,6 @@ textarea::placeholder { color: rgba(242, 245, 239, 0.32); }
   background-size: 7px 7px;
   animation: entra .35s ease both;
 }
-.colete:nth-child(2) { animation-delay: .08s; }
-.colete:nth-child(3) { animation-delay: .16s; }
 @keyframes entra { from { opacity: 0; transform: translateY(8px); } }
 @media (prefers-reduced-motion: reduce) { .colete { animation: none; } }
 
@@ -119,6 +145,13 @@ textarea::placeholder { color: rgba(242, 245, 239, 0.32); }
   font-weight: 500; font-size: 15px; padding: 7px 0;
   border-top: 1px solid rgba(0,0,0,0.14);
 }
+
+/* coletes escuros (preto, roxo, marrom) precisam de texto claro */
+.colete.escuro {
+  color: var(--ink);
+  background-image: radial-gradient(rgba(255,255,255,0.10) 1px, transparent 1.4px);
+}
+.colete.escuro li { border-top-color: rgba(255,255,255,0.16); }
 
 .bench { margin-top: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
 .bench h3 { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 8px; }

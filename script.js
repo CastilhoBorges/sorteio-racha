@@ -1,41 +1,106 @@
 (function () {
   var L = window.RachaLogic;
+  var LIM = L.LIMITES_CONFIG;
 
-  var COLETES = [
-    { nome: 'Vermelho', cor: '#FF4D3E', emoji: '🔴' },
-    { nome: 'Amarelo', cor: '#FFD400', emoji: '🟡' },
-    { nome: 'Azul',    cor: '#2E9BFF', emoji: '🔵' }
-  ];
-  var MODES = { futsal: { porTime: 4, rotulo: 'Futsal (3 times de 4)' },
-                society: { porTime: 6, rotulo: 'Society (3 times de 6)' } };
-
-  var mode = 'futsal';
   var excluidos = {};        // nomes removidos manualmente (clique no ×)
   var ultimoSorteio = null;  // { times, proximos, faltam }
   var tipoSorteio = null;    // 'equilibrado' | 'aleatorio'
+  var paletaAberta = null;   // índice do time com a paleta de cores aberta, ou null
 
   var $ = function (id) { return document.getElementById(id); };
   var lista = $('lista'), chips = $('chips'), counter = $('counter'),
       continuarBtn = $('continuarBtn'), teamsEl = $('teams'),
       bench = $('bench'), benchNames = $('benchNames'), rNote = $('rNote'),
-      avaliacao = $('avaliacao'), toast = $('toast');
+      avaliacao = $('avaliacao'), toast = $('toast'),
+      coletesRow = $('coletesRow'), paleta = $('paleta'),
+      timesVal = $('timesVal'), porTimeVal = $('porTimeVal');
 
-  var repoNotas = L.criarRepositorioNotas((function () {
+  var storage = (function () {
     try { return window.localStorage; } catch (e) { return null; }
-  })());
+  })();
+  var repoNotas = L.criarRepositorioNotas(storage);
+  var repoConfig = L.criarRepositorioConfig(storage);
+  var config = repoConfig.obter();
 
-  // sugere a modalidade pelo dia da semana (sex–dom = society)
-  var dia = new Date().getDay();
-  mode = (dia === 0 || dia === 5 || dia === 6) ? 'society' : 'futsal';
-
-  function setMode(m) {
-    mode = m;
-    $('modeFutsal').setAttribute('aria-pressed', String(m === 'futsal'));
-    $('modeSociety').setAttribute('aria-pressed', String(m === 'society'));
+  function aplicarConfig(novo) {
+    config = repoConfig.definir(novo);
+    renderConfig();
     render();
   }
-  $('modeFutsal').addEventListener('click', function () { setMode('futsal'); });
-  $('modeSociety').addEventListener('click', function () { setMode('society'); });
+
+  // ---- configuração: steppers e coletes ----
+  $('timesMenos').addEventListener('click', function () {
+    aplicarConfig({ times: config.times - 1, porTime: config.porTime, cores: config.cores });
+  });
+  $('timesMais').addEventListener('click', function () {
+    aplicarConfig({ times: config.times + 1, porTime: config.porTime, cores: config.cores });
+  });
+  $('porTimeMenos').addEventListener('click', function () {
+    aplicarConfig({ times: config.times, porTime: config.porTime - 1, cores: config.cores });
+  });
+  $('porTimeMais').addEventListener('click', function () {
+    aplicarConfig({ times: config.times, porTime: config.porTime + 1, cores: config.cores });
+  });
+
+  function renderConfig() {
+    timesVal.textContent = config.times;
+    porTimeVal.textContent = config.porTime;
+    $('timesMenos').disabled = config.times <= LIM.minTimes;
+    $('timesMais').disabled = config.times >= LIM.maxTimes;
+    $('porTimeMenos').disabled = config.porTime <= LIM.minPorTime;
+    $('porTimeMais').disabled = config.porTime >= LIM.maxPorTime;
+
+    if (paletaAberta !== null && paletaAberta >= config.times) paletaAberta = null;
+
+    coletesRow.innerHTML = '';
+    config.cores.forEach(function (id, i) {
+      var c = L.corPorId(id);
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'colete-dot' + (c.escuro ? ' escuro' : '') + (paletaAberta === i ? ' aberto' : '');
+      b.style.backgroundColor = c.cor;
+      b.textContent = i + 1;
+      b.setAttribute('aria-label', 'Time ' + (i + 1) + ': colete ' + c.nome.toLowerCase() + '. Trocar cor.');
+      b.setAttribute('aria-expanded', String(paletaAberta === i));
+      b.addEventListener('click', function () {
+        paletaAberta = paletaAberta === i ? null : i;
+        renderConfig();
+      });
+      coletesRow.appendChild(b);
+    });
+
+    paleta.innerHTML = '';
+    paleta.hidden = paletaAberta === null;
+    if (paletaAberta === null) return;
+
+    var titulo = document.createElement('span');
+    titulo.className = 'paleta-titulo';
+    titulo.textContent = 'Cor do time ' + (paletaAberta + 1) + ':';
+    paleta.appendChild(titulo);
+    L.CORES_COLETE.forEach(function (c) {
+      var usadaPor = config.cores.indexOf(c.id);
+      var minha = usadaPor === paletaAberta;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'paleta-dot' + (minha ? ' atual' : '');
+      b.style.backgroundColor = c.cor;
+      b.title = c.nome;
+      b.disabled = usadaPor !== -1 && !minha;
+      b.setAttribute('aria-label', c.nome + (b.disabled ? ' (já usada por outro time)' : ''));
+      b.addEventListener('click', function () {
+        var cores = config.cores.slice();
+        cores[paletaAberta] = c.id;
+        paletaAberta = null;
+        aplicarConfig({ times: config.times, porTime: config.porTime, cores: cores });
+      });
+      paleta.appendChild(b);
+    });
+  }
+
+  function rotulo() { return config.times + ' times de ' + config.porTime; }
+  function coletesAtuais() {
+    return config.cores.map(function (id) { return L.corPorId(id); });
+  }
 
   function nomesDetectados() { return L.extrairNomes(lista.value, excluidos); }
 
@@ -53,7 +118,7 @@
   // ---- render da prévia (etapa 1) ----
   function render() {
     var nomes = nomesDetectados();
-    var precisa = MODES[mode].porTime * 3;
+    var precisa = config.times * config.porTime;
 
     chips.innerHTML = '';
     nomes.forEach(function (nome, i) {
@@ -80,16 +145,16 @@
     } else if (nomes.length < precisa) {
       counter.className += ' warn';
       counter.innerHTML = '<strong>' + nomes.length + ' nomes</strong> — faltam ' +
-        (precisa - nomes.length) + ' pra fechar ' + precisa + ' (' + MODES[mode].rotulo + ').';
+        (precisa - nomes.length) + ' pra fechar ' + precisa + ' (' + rotulo() + ').';
     } else if (nomes.length === precisa) {
       counter.className += ' ok';
-      counter.innerHTML = '<strong>' + nomes.length + ' nomes</strong> — conta fechada pro ' + mode + '.';
+      counter.innerHTML = '<strong>' + nomes.length + ' nomes</strong> — conta fechada: ' + rotulo() + '.';
     } else {
       counter.innerHTML = '<strong>' + nomes.length + ' nomes</strong> — os ' + precisa +
         ' primeiros da lista entram no sorteio, ' + (nomes.length - precisa) + ' ficam de próximo.';
     }
 
-    continuarBtn.disabled = nomes.length < 3;
+    continuarBtn.disabled = nomes.length < config.times;
   }
   lista.addEventListener('input', function () { excluidos = {}; render(); });
 
@@ -101,7 +166,7 @@
   // ---- etapa 2: avaliação ----
   function renderAvaliacao() {
     var nomes = nomesDetectados();
-    var precisa = MODES[mode].porTime * 3;
+    var precisa = config.times * config.porTime;
     avaliacao.innerHTML = '';
     nomes.forEach(function (nome, idx) {
       var row = document.createElement('div');
@@ -141,10 +206,9 @@
   function sortear(tipo) {
     tipoSorteio = tipo;
     var nomes = nomesDetectados();
-    var porTime = MODES[mode].porTime;
     ultimoSorteio = tipo === 'equilibrado'
-      ? L.distribuirEquilibrado(nomes, repoNotas.todas(), porTime)
-      : L.distribuirAleatorio(nomes, porTime);
+      ? L.distribuirEquilibrado(nomes, repoNotas.todas(), config.porTime, config.times)
+      : L.distribuirAleatorio(nomes, config.porTime, config.times);
     mostrarResultado();
     irParaEtapa(3);
   }
@@ -153,14 +217,16 @@
     var s = ultimoSorteio;
     teamsEl.innerHTML = '';
     s.times.forEach(function (time, i) {
+      var c = L.corPorId(config.cores[i]);
       var card = document.createElement('article');
-      card.className = 'colete';
-      card.style.backgroundColor = COLETES[i].cor;
+      card.className = 'colete' + (c.escuro ? ' escuro' : '');
+      card.style.backgroundColor = c.cor;
+      card.style.animationDelay = (i * 0.08) + 's';
       var label = document.createElement('div');
       label.className = 't-label';
       label.textContent = 'Time ' + (i + 1);
       var h2 = document.createElement('h2');
-      h2.textContent = 'Colete ' + COLETES[i].nome;
+      h2.textContent = 'Colete ' + c.nome;
       var ol = document.createElement('ol');
       time.forEach(function (nome) {
         var li = document.createElement('li');
@@ -195,7 +261,7 @@
 
   // ---- exportar pro WhatsApp ----
   function textoAtual() {
-    return L.montarTexto(ultimoSorteio, MODES[mode].rotulo, COLETES, null);
+    return L.montarTexto(ultimoSorteio, rotulo(), coletesAtuais(), null);
   }
 
   $('waBtn').addEventListener('click', function () {
@@ -225,6 +291,7 @@
     }
   });
 
-  setMode(mode);
+  renderConfig();
+  render();
   irParaEtapa(1);
 })();

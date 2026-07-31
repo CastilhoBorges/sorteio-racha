@@ -29,16 +29,29 @@
   </header>
 
   <section class="etapa" id="etapa1">
-    <div class="mode" role="group" aria-label="Modalidade">
-      <button type="button" id="modeSociety" aria-pressed="false">
-        <span class="m-name">Society</span>
-        <span class="m-desc">3 times de 6 &middot; 18 em campo</span>
-      </button>
-      <button type="button" id="modeFutsal" aria-pressed="false">
-        <span class="m-name">Futsal</span>
-        <span class="m-desc">3 times de 4 &middot; 12 na quadra</span>
-      </button>
+    <div class="config" role="group" aria-label="Configuração do racha">
+      <div class="stepper">
+        <span class="s-label" id="lblTimes">Times</span>
+        <div class="s-controls">
+          <button type="button" id="timesMenos" aria-label="Menos times">&minus;</button>
+          <output id="timesVal" aria-labelledby="lblTimes">3</output>
+          <button type="button" id="timesMais" aria-label="Mais times">+</button>
+        </div>
+      </div>
+      <div class="stepper">
+        <span class="s-label" id="lblPorTime">Por time</span>
+        <div class="s-controls">
+          <button type="button" id="porTimeMenos" aria-label="Menos jogadores por time">&minus;</button>
+          <output id="porTimeVal" aria-labelledby="lblPorTime">4</output>
+          <button type="button" id="porTimeMais" aria-label="Mais jogadores por time">+</button>
+        </div>
+      </div>
+      <div class="coletes-cfg">
+        <span class="s-label">Coletes &mdash; toque pra trocar a cor</span>
+        <div class="coletes-row" id="coletesRow"></div>
+      </div>
     </div>
+    <div class="paleta" id="paleta" hidden></div>
 
     <div class="field">
       <label for="lista">Cole a lista do grupo
